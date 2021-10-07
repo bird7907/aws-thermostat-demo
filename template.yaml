@@ -1,0 +1,367 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "AWS thermostat demo"
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Timeout: 60 
+    Tracing: Active
+    MemorySize: 1024 # From Lambda Power Tuner - https://lambda-power-tuning.show/#gAAAAQACAAQACMAL;Fu+DQkrxg0JplAJBPCnQQBhL0EDm+NlA;m1ZfNJtW3zSbVl81m1bfNZtWXzaaA6Q2
+    Tags:
+      Application: serverless-web-app
+  Api:
+    Auth:
+      UsagePlan:
+        UsagePlanName: DailyUsagePlan
+        CreateUsagePlan: PER_API
+        Description: This will limit 5000 executions per day and throttle executions on 10% of that.
+        Quota:
+          Limit: 5000
+          Period: DAY
+        Throttle:
+          BurstLimit: 100
+          RateLimit: 50
+
+Parameters:
+  VersionParam:
+    Type: String
+    Default: v1
+  StageNameParam:
+    Type: String
+    Default: prod
+  CognitoDomainName:
+    Type: String
+    Default: thermostatdemo
+
+  # For Amplify Console frontend hosting
+  Repository:
+    Type: String
+    Description: GitHub Repository URL
+  Branch:
+    Type: String
+    Description: GitHub Branch
+    Default: master
+  OauthToken:
+    Type: String
+    Description: GitHub Repository URL
+    NoEcho: true
+
+Resources:
+
+#cognito declaration
+  ThermostatUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      UserPoolName: ThermostatUsers
+      UsernameAttributes:
+      - email
+      AutoVerifiedAttributes:
+      - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: true
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: true
+  
+  ThermostatUserPoolTokenClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref ThermostatUserPool
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: ['code', 'implicit']
+      CallbackURLs: ['http://localhost:3000', 'http://localhost:8080' ,'https://localhost', !Join ['', ['https://', !GetAtt AmplifyBranch.BranchName, '.', !GetAtt AmplifyApp.DefaultDomain]]]
+      SupportedIdentityProviders: ['COGNITO']
+      AllowedOAuthScopes: ['phone', 'email', 'openid']
+      ExplicitAuthFlows:
+      - USER_PASSWORD_AUTH
+  
+  ThermostatDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      Domain: !Join ['-', [!Ref CognitoDomainName, !Ref AWS::StackName]]
+      UserPoolId: !Ref ThermostatUserPool
+
+  ThermostatTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['-', [ThermostatTable, !Ref AWS::StackName]]
+      KeySchema:
+          - AttributeName: cognitoUsername
+            KeyType: HASH
+          - AttributeName: id
+            KeyType: RANGE
+      AttributeDefinitions:
+          - AttributeName: cognitoUsername
+            AttributeType: S
+          - AttributeName: id
+            AttributeType: S
+      ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5                  
+      SSESpecification:
+        SSEEnabled: true
+
+  # API declaration
+  ThermostatApi:
+    Type: AWS::Serverless::Api
+    MethodSettings: 
+        DataTraceEnabled: true
+        MetricsEnabled: true
+        HttpMethod: '*'
+        ResourcePath: !Sub '${VersionParam}/*'
+        LoggingLevel: INFO
+    AccessLogSetting:
+      DestinationArn: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ApiAccessLogGroup}'
+      Format: '$context.identity.sourceIp $context.authorizer.claims.sub [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.requestId $context.awsEndpointRequestId $context.xrayTraceId $context.responseLatency $context.integrationLatency "$context.error.message"'
+    Properties:
+      Name: ThermostatApi
+      StageName: !Ref StageNameParam
+      TracingEnabled: true
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'OPTIONS,HEAD,GET,PUT,POST,DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amzn-Trace-Id'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt "ThermostatUserPool.Arn"
+
+  # API Functions
+  GetThermostatFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: backend/getThermostat
+      Handler: app.getThermostatItem
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ThermostatTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ThermostatTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
+
+      Events:
+        GetItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /thermostats/{id}
+            Method: GET
+            RestApiId: !Ref ThermostatApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+  GetAllThermostatFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: backend/getAllThermostat
+      Handler: app.getAllThermostatItem
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ThermostatTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ThermostatTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+
+      Events:
+        GetItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /thermostats
+            Method: GET
+            RestApiId: !Ref ThermostatApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+  AddThermostatFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: backend/addThermostat/
+      Handler: app.addThermostatItem
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ThermostatTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ThermostatTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+
+      Events:
+        PutItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /thermostats
+            Method: PUT
+            RestApiId: !Ref ThermostatApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+  # UpdateThermostatFunction:
+  #     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  #     Properties:
+  #       CodeUri: backend/updateThermostat/
+  #       Handler: app.updateThermostatItem
+  #       Tracing: Active
+  #       Policies:
+  #         - DynamoDBCrudPolicy:
+  #             TableName: !Ref ThermostatTable
+  #         - CloudWatchPutMetricPolicy: {}
+  #       Environment:
+  #         Variables:
+  #           TABLE_NAME: !Ref ThermostatTable
+  #           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+  #       Events:
+  #         UpdateItem:
+  #           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+  #           Properties:
+  #             Path: /thermostats/{id}
+  #             Method: PUT
+  #             RestApiId: !Ref ThermostatApi
+  #             Auth:
+  #               Authorizer: CognitoAuthorizer
+
+  # DeleteThermostatFunction:
+  #   Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  #   Properties:
+  #     CodeUri: backend/deleteThermostat
+  #     Handler: app.deleteThermostatItem
+  #     Tracing: Active
+  #     Policies:
+  #       - DynamoDBCrudPolicy:
+  #           TableName: !Ref ThermostatTable
+  #       - CloudWatchPutMetricPolicy: {}
+  #     Environment:
+  #       Variables:
+  #         TABLE_NAME: !Ref ThermostatTable
+  #         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+  #         ENDPOINT_OVERRIDE: ""
+
+  #     Events:
+  #       DeleteItem:
+  #         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+  #         Properties:
+  #           Path: /thermostats/{id}
+  #           Method: DELETE
+  #           RestApiId: !Ref ThermostatApi
+  #           Auth:
+  #             Authorizer: CognitoAuthorizer
+
+  # This role allows API Gateway to push execution and access logs to CloudWatch logs
+  ApiGatewayPushToCloudWatchRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Description: "Push logs to CloudWatch logs from API Gateway"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+
+  
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/AccessLog-${ThermostatApi}
+      RetentionInDays: 365
+
+  # Amplify console hosting for static website
+  # 
+  AmplifyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - amplify.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: Amplify
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "amplify:*"
+                Resource: "*"
+
+  AmplifyApp:
+    Type: "AWS::Amplify::App"
+    Properties:
+      Name: ThermostatApp
+      Repository: !Ref Repository
+      Description: Thermostat example app
+      OauthToken: !Ref OauthToken
+      BuildSpec: |-
+        version: 0.1
+        frontend:
+          phases:
+            build:
+              commands:
+                - cd www/src
+                - npm install
+                - npm run build
+          artifacts:
+            baseDirectory: www/build/
+            files:
+              - '**/*'
+      Tags:
+        - Key: Name
+          Value: Thermostat
+      IAMServiceRole: !GetAtt AmplifyRole.Arn
+
+  AmplifyBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      BranchName: !Ref Branch
+      AppId: !GetAtt AmplifyApp.AppId
+      Description: Amplify Console Branch
+      EnableAutoBuild: true
+      Tags:
+        - Key: Name
+          Value: thermostat-amplify-console
+        - Key: Branch
+          Value: !Ref Branch
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ThermostatFunctionApi:
+    Description: API Gateway endpoint URL for Prod stage
+    Value: !Sub "https://${ThermostatApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}"
+  CognitoID:
+    Description: The Cognito UserPool ID
+    Value: !Ref ThermostatUserPool
+  CognitoClientID:
+    Description: The Cognito UserPool Client ID
+    Value: !Ref ThermostatUserPoolTokenClient
+  CognitoDomainName:
+    Description: The Cognito Hosted UI Domain Name
+    Value: !Join ['', [!Ref CognitoDomainName, '-', !Ref AWS::StackName, '.auth.', !Ref AWS::Region, '.amazoncognito.com']]
+  AmplifyURL:
+    Value: !Join ['', ['https://', !GetAtt AmplifyBranch.BranchName, '.', !GetAtt AmplifyApp.DefaultDomain]]
