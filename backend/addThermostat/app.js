@@ -9,7 +9,7 @@ const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 const { v1: uuidv1 } = require("uuid");
 
 // environment variables
-const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
+const { THERMOSTAT_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
 console.log('REGION='+REGION);
 AWS.config.update({ region: REGION });
@@ -44,7 +44,7 @@ function getCognitoUsername(event) {
 
 function addRecord(event) {
   let usernameField = {
-    "cognitoUsername": getCognitoUsername(event),
+    "cognito_username": getCognitoUsername(event),
   };
 
   // auto generated date fields
@@ -62,12 +62,12 @@ function addRecord(event) {
     ...JSON.parse(event.body),
   };
 
-  console.log("TABLE_NAME: "+TABLE_NAME+"\r\n");
+  console.log("THERMOSTAT_TABLE: "+THERMOSTAT_TABLE+"\r\n");
   console.log("Test body: "+JSON.stringify(item_body)+"\r\n");
 
   //final params to DynamoDB
   const params = {
-    TableName: TABLE_NAME,
+    TableName: THERMOSTAT_TABLE,
     Item: item_body,
   };
 

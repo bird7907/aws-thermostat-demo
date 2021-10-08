@@ -6,10 +6,12 @@ const AWSXRay = require("aws-xray-sdk-core");
 const AWS = AWSXRay.captureAWS(require("aws-sdk"));
 const { metricScope, Unit } = require("aws-embedded-metrics");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
+const { v1: uuidv1 } = require("uuid");
 
 // environment variables
-const { THERMOSTAT_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
+const { LOG_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
+console.log('REGION='+REGION);
 AWS.config.update({ region: REGION });
 
 if (ENDPOINT_OVERRIDE !== "") {
@@ -29,12 +31,7 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(event) {
-  return (
-    event !== null &&
-    event.pathParameters !== null &&
-    event.pathParameters.id !== null &&
-    /^[\w-]+$/.test(event.pathParameters.id)
-  );
+  return event.body !== null;
 }
 
 function getCognitoUsername(event) {
@@ -45,41 +42,63 @@ function getCognitoUsername(event) {
   return null;
 }
 
-function getRecordById(username, recordId) {
-  let params = {
-    TableName: THERMOSTAT_TABLE,
-    Key: {
-      "cognito_username": username,
-      id: recordId,
-    },
+function addRecord(event) {
+  let usernameField = {
+    "cognito_username": getCognitoUsername(event),
   };
 
-  return docClient.get(params);
+  // auto generated date fields
+  let dISO = new Date().toISOString();
+  let auto_fields = {
+    id: uuidv1(),
+    creation_date: dISO,
+    lastupdate_date: dISO,
+  };
+
+  //merge the json objects
+  let item_body = {
+    ...usernameField,
+    ...auto_fields,
+    ...JSON.parse(event.body),
+  };
+
+  console.log("LOG_TABLE: "+LOG_TABLE+"\r\n");
+  console.log("Test body: "+JSON.stringify(item_body)+"\r\n");
+
+  //final params to DynamoDB
+  const params = {
+    TableName: LOG_TABLE,
+    Item: item_body,
+  };
+
+  return docClient.put(params);
 }
 
 // Lambda Handler
-exports.getThermostatItem = metricScope((metrics) => async (event, context) => {
-  console.log('getThermostatItem, event=' + JSON.stringify(event));
+exports.addThermostatItem = metricScope((metrics) => async (event, context) => {
+  console.log("addThermostatItem");
+  console.log(JSON.stringify(event));
+  console.log(JSON.stringify(context));
 
   metrics.setNamespace("ThermostatApp");
-  metrics.putDimensions({ Service: "getThermostat" });
+  metrics.putDimensions({ Service: "addThermostat" });
   metrics.setProperty("RequestId", context.requestId);
+
   if (!isValidRequest(event)) {
     metrics.putMetric("Error", 1, Unit.Count);
     return response(400, { message: "Error: Invalid request" });
   }
 
-
   try {
-    let username = getCognitoUsername(event);
-    let data = await getRecordById(username, event.pathParameters.id).promise();
-
-    console.log(data);
-
+    let data = await addRecord(event).promise();
     metrics.putMetric("Success", 1, Unit.Count);
+    // let data = {"msg": "success"};
+
+    console.log("data="+JSON.stringify(data));
     return response(200, data);
   } catch (err) {
     metrics.putMetric("Error", 1, Unit.Count);
+    console.warn("err: "+JSON.stringify(err));
     return response(400, { message: err.message });
   }
 });

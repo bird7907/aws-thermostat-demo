@@ -9,7 +9,7 @@ const { metricScope, Unit } = require("aws-embedded-metrics");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
 // environment variables
-const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
+const { LOG_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
 AWS.config.update({ region: REGION });
 
@@ -38,15 +38,15 @@ function getCognitoUsername(event) {
   return null;
 }
 
-// Retrieve all the items by cognitoUsername
+// Retrieve all the items by cognito_username
 function getRecords(username) {
   console.log('getRecords, username='+username);
 
   let params = {
-    TableName: TABLE_NAME,
+    TableName: LOG_TABLE,
     KeyConditionExpression: "#username = :username",
     ExpressionAttributeNames: {
-      "#username": "cognitoUsername",
+      "#username": "cognito_username",
     },
     ExpressionAttributeValues: {
       ":username": username,
@@ -57,9 +57,9 @@ function getRecords(username) {
 }
 
 // Lambda Handler
-exports.getAllThermostatItem = metricScope((metrics) => async (event, context) => {
+exports.getAllLogItems = metricScope((metrics) => async (event, context) => {
   metrics.setNamespace("ThermostatApp");
-  metrics.putDimensions({ Service: "getAllThermostat" });
+  metrics.putDimensions({ Service: "getAllLog" });
   metrics.setProperty("RequestId", context.requestId);
 
   
@@ -67,7 +67,7 @@ exports.getAllThermostatItem = metricScope((metrics) => async (event, context) =
     let username = getCognitoUsername(event);
     let data = await getRecords(username).promise();
 
-    console.log('getAllThermostatItem, data:', data);
+    console.log('getAllLogItems, data:', data);
 
     metrics.putMetric("Success", 1, Unit.Count);
     return response(200, data);

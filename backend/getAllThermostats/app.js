@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT-0
 
 // default imports
-const AWSXRay = require("aws-xray-sdk-core");
-const AWS = AWSXRay.captureAWS(require("aws-sdk"));
+// const AWSXRay = require("aws-xray-sdk-core");
+// const AWS = AWSXRay.captureAWS(require("aws-sdk"));
+const AWS =require("aws-sdk");
 const { metricScope, Unit } = require("aws-embedded-metrics");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
@@ -28,15 +29,7 @@ const response = (statusCode, body, additionalHeaders) => ({
   },
 });
 
-function isValidRequest(event) {
-  return (
-    event !== null &&
-    event.pathParameters !== null &&
-    event.pathParameters.id !== null &&
-    /^[\w-]+$/.test(event.pathParameters.id)
-  );
-}
-
+// Get cognito username from claims
 function getCognitoUsername(event) {
   let authHeader = event.requestContext.authorizer;
   if (authHeader !== null) {
@@ -45,41 +38,42 @@ function getCognitoUsername(event) {
   return null;
 }
 
-function getRecordById(username, recordId) {
+// Retrieve all the items by cognito_username
+function getRecords(username) {
+  console.log('getRecords, username='+username);
+
   let params = {
     TableName: THERMOSTAT_TABLE,
-    Key: {
-      "cognito_username": username,
-      id: recordId,
+    KeyConditionExpression: "#username = :username",
+    ExpressionAttributeNames: {
+      "#username": "cognito_username",
+    },
+    ExpressionAttributeValues: {
+      ":username": username,
     },
   };
 
-  return docClient.get(params);
+  return docClient.query(params);
 }
 
 // Lambda Handler
-exports.getThermostatItem = metricScope((metrics) => async (event, context) => {
-  console.log('getThermostatItem, event=' + JSON.stringify(event));
-
+exports.getAllThermostatItems = metricScope((metrics) => async (event, context) => {
   metrics.setNamespace("ThermostatApp");
-  metrics.putDimensions({ Service: "getThermostat" });
+  metrics.putDimensions({ Service: "getAllThermostat" });
   metrics.setProperty("RequestId", context.requestId);
-  if (!isValidRequest(event)) {
-    metrics.putMetric("Error", 1, Unit.Count);
-    return response(400, { message: "Error: Invalid request" });
-  }
 
-
+  
   try {
     let username = getCognitoUsername(event);
-    let data = await getRecordById(username, event.pathParameters.id).promise();
+    let data = await getRecords(username).promise();
 
-    console.log(data);
+    console.log('getAllThermostatItems, data:', data);
 
     metrics.putMetric("Success", 1, Unit.Count);
     return response(200, data);
   } catch (err) {
     metrics.putMetric("Error", 1, Unit.Count);
+    console.error(err.message);
     return response(400, { message: err.message });
   }
 });
