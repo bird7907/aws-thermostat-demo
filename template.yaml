@@ -34,10 +34,10 @@ Parameters:
   CognitoDomainName:
     Type: String
     Default: thermostatdemo
-  ThermostatTable:
+  ThermostatTableName:
     Type: String
     Default: thermostat-table
-  LogTable:
+  LogTableName:
     Type: String
     Default: log-table
 
@@ -168,11 +168,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref ThermostatTable
+            TableName: !Ref ThermostatTableName
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTable
+          TABLE_NAME: !Ref ThermostatTableName
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           USE_DYNAMODB_LOCAL: "0"
           DYNAMODB_LOCAL_URI: ""
@@ -195,11 +195,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref ThermostatTable
+            TableName: !Ref ThermostatTableName
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTable
+          TABLE_NAME: !Ref ThermostatTableName
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -221,11 +221,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref ThermostatTable
+            TableName: !Ref ThermostatTableName
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTable
+          TABLE_NAME: !Ref ThermostatTableName
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -251,11 +251,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref LogTable
+            TableName: !Ref LogTableName
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref LogTable
+          TABLE_NAME: !Ref LogTableName
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -277,11 +277,11 @@ Resources:
 #       Tracing: Active
 #       Policies:
 #         - DynamoDBCrudPolicy:
-#             TableName: !Ref ThermostatTable
+#             TableName: !Ref ThermostatTableName
 #         - CloudWatchPutMetricPolicy: {}
 #       Environment:
 #         Variables:
-#           TABLE_NAME: !Ref ThermostatTable
+#           TABLE_NAME: !Ref ThermostatTableName
 #           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
 #       Events:
 #         UpdateItem:
@@ -300,11 +300,11 @@ Resources:
 #     Tracing: Active
 #     Policies:
 #       - DynamoDBCrudPolicy:
-#           TableName: !Ref ThermostatTable
+#           TableName: !Ref ThermostatTableName
 #       - CloudWatchPutMetricPolicy: {}
 #     Environment:
 #       Variables:
-#         TABLE_NAME: !Ref ThermostatTable
+#         TABLE_NAME: !Ref ThermostatTableName
 #         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
 #         ENDPOINT_OVERRIDE: ""
 #     Events:
@@ -324,11 +324,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref LogTable
+            TableName: !Ref LogTableName
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref LogTable
+          TABLE_NAME: !Ref LogTableName
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 

@@ -9,7 +9,7 @@ const { metricScope, Unit } = require("aws-embedded-metrics");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
 // environment variables
-const { THERMOSTAT_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
+const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
 AWS.config.update({ region: REGION });
 
@@ -43,7 +43,7 @@ function getRecords(username) {
   console.log('getRecords, username='+username);
 
   let params = {
-    TableName: THERMOSTAT_TABLE,
+    TableName: TABLE_NAME,
     KeyConditionExpression: "#username = :username",
     ExpressionAttributeNames: {
       "#username": "cognito_username",

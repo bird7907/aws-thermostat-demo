@@ -9,7 +9,7 @@ const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 const { v1: uuidv1 } = require("uuid");
 
 // environment variables
-const { LOG_TABLE, ENDPOINT_OVERRIDE, REGION } = process.env;
+const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
 console.log('REGION='+REGION);
 AWS.config.update({ region: REGION });
@@ -62,12 +62,12 @@ function addRecord(event) {
     ...JSON.parse(event.body),
   };
 
-  console.log("LOG_TABLE: "+LOG_TABLE+"\r\n");
+  console.log("TABLE_NAME: "+TABLE_NAME+"\r\n");
   console.log("Test body: "+JSON.stringify(item_body)+"\r\n");
 
   //final params to DynamoDB
   const params = {
-    TableName: LOG_TABLE,
+    TableName: TABLE_NAME,
     Item: item_body,
   };
 
@@ -75,13 +75,13 @@ function addRecord(event) {
 }
 
 // Lambda Handler
-exports.addThermostatItem = metricScope((metrics) => async (event, context) => {
-  console.log("addThermostatItem");
+exports.addLogItem = metricScope((metrics) => async (event, context) => {
+  console.log("addLogItem");
   console.log(JSON.stringify(event));
   console.log(JSON.stringify(context));
 
   metrics.setNamespace("ThermostatApp");
-  metrics.putDimensions({ Service: "addThermostat" });
+  metrics.putDimensions({ Service: "addLog" });
   metrics.setProperty("RequestId", context.requestId);
 
   if (!isValidRequest(event)) {
