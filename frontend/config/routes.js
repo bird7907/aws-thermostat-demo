@@ -57,6 +57,13 @@ export default [
         layout: 'BasicLayout',
       },
       {
+        name: 'thermostat',
+        icon: 'table',
+        path: '/thermostat',
+        component: './ThermostatList',
+        layout: 'BasicLayout',
+      },
+      {
         path: '/',
         redirect: '/welcome',
       },

@@ -2,72 +2,68 @@
 
 /* eslint-disable */
 import { request } from 'umi';
-/** 获取当前的用户 GET /api/currentUser */
+import awsconfig from '../../awsConfig';
+import axios from 'axios';
 
-export async function currentUser(options) {
-  return request('/api/currentUser', {
-    method: 'GET',
-    ...(options || {}),
-  });
-}
-/** 退出登录接口 POST /api/login/outLogin */
 
-export async function outLogin(options) {
-  return request('/api/login/outLogin', {
-    method: 'POST',
-    ...(options || {}),
-  });
-}
-/** 登录接口 POST /api/login/account */
+// export async function getAllThermostats(options) {
+//   return request(`https://${awsconfig.cognito_hosted_domain}/thermostats`, {
+//     // return request(`/thermostats`, {
+//     method: 'GET',
+//     ...(options || {}),
+//   });
+// }
 
-export async function login(body, options) {
-  return request('/api/login/account', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
-/** 此处后端没有提供注释 GET /api/notices */
+export async function getAllThermostats(params, options) {
+  let headers = {};
+  if (localStorage.getItem('awsToken')) {
+    headers = {
+      'Authorization': `Bearer ${localStorage.getItem('awsToken')}`,
+    };
+  }
 
-export async function getNotices(options) {
-  return request('/api/notices', {
-    method: 'GET',
-    ...(options || {}),
-  });
-}
-/** 获取规则列表 GET /api/rule */
+  options = { ...options, headers };
 
-export async function rule(params, options) {
-  return request('/api/rule', {
-    method: 'GET',
-    params: { ...params },
-    ...(options || {}),
-  });
+  return axios.get(`${awsconfig.api_base_url}/thermostats/`,
+    {
+      params: { ...params },
+      ...(options || {}),
+    }
+  )
 }
-/** 新建规则 PUT /api/rule */
 
-export async function updateRule(options) {
-  return request('/api/rule', {
-    method: 'PUT',
-    ...(options || {}),
-  });
-}
-/** 新建规则 POST /api/rule */
+export async function addThermostat(data, params, options) {
+  let headers = {};
+  if (localStorage.getItem('awsToken')) {
+    headers = {
+      'Authorization': `Bearer ${localStorage.getItem('awsToken')}`,
+    };
+  }
 
-export async function addRule(options) {
-  return request('/api/rule', {
-    method: 'POST',
-    ...(options || {}),
-  });
-}
-/** 删除规则 DELETE /api/rule */
+  options = { ...options, headers };
 
-export async function removeRule(options) {
-  return request('/api/rule', {
-    method: 'DELETE',
-    ...(options || {}),
-  });
+  return axios.put(`${awsconfig.api_base_url}/thermostats/`, { ...data },
+    {
+      params: { ...params },
+      ...(options || {}),
+    }
+  )
 }
+
+export async function updateThermostat(data, params, options) {
+  let headers = {};
+  if (localStorage.getItem('awsToken')) {
+    headers = {
+      'Authorization': `Bearer ${localStorage.getItem('awsToken')}`,
+    };
+  }
+
+  options = { ...options, headers };
+
+  return axios.put(`${awsconfig.api_base_url}/thermostats/${params.id}/`, { ...data },
+    {
+      ...(options || {}),
+    }
+  )
+}
+
