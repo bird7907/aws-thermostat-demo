@@ -52,8 +52,8 @@ export async function getInitialState() {
     objects.forEach(object => {
       const keyVal = object.split("=");
       if (keyVal[0] === "id_token") {
-        token = keyVal[0] ;
-        localStorage.setItem('awsToken', keyVal[0]);
+        token = keyVal[1] ;
+        localStorage.setItem('awsToken', keyVal[1]);
       }
     });
 
