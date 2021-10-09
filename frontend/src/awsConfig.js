@@ -3,12 +3,10 @@
 
 const awsconfig = {
     "aws_project_region": "us-west-2",
-    "aws_user_pools_web_client_id": "31i4f4k9uqujnsl6o4aumcvlgu",
-    "api_base_url": "https://l1unaseofh.execute-api.us-west-2.amazonaws.com/prod",
-    "cognito_hosted_domain": "mytodoappdemo-todo-demo.auth.us-west-2.amazoncognito.com",
-    // "redirect_url": "https://master.d1gbbx9nzhqa8j.amplifyapp.com"
-    "redirect_url": "http://localhost:8000"
-
+    "aws_user_pools_web_client_id": "7rnoja5sv5i2ifq6khuujfhs5k",
+    "api_base_url": "https://nu1vvuyxc1.execute-api.us-west-2.amazonaws.com/prod",
+    "cognito_hosted_domain": "thermostatdemo-thermostat-demo.auth.us-west-2.amazoncognito.com",
+    "redirect_url": "https://master.d1cr5ovm4o4uz7.amplifyapp.com"
 };
 
 export default awsconfig;

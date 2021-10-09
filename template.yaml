@@ -339,18 +339,18 @@ Resources:
       FunctionName: !Ref AddThermostatFunction
 
   # Log after adding item
-  InvokeLoggingconfig:
-    Type: AWS::Lambda::EventInvokeConfig
-    Properties:
-      DestinationConfig:
-          OnFailure:
-            Destination: !GetAtt 'AddLogFunction.Arn'
-          OnSuccess:
-            Destination: !GetAtt 'AddLogFunction.Arn'
-      FunctionName: !Ref AddThermostatFunction
-      MaximumEventAgeInSeconds: 300
-      MaximumRetryAttempts: 1
-      Qualifier: !GetAtt Version.Version
+  # InvokeLoggingconfig:
+  #   Type: AWS::Lambda::EventInvokeConfig
+  #   Properties:
+  #     DestinationConfig:
+  #         OnFailure:
+  #           Destination: !GetAtt 'AddLogFunction.Arn'
+  #         OnSuccess:
+  #           Destination: !GetAtt 'AddLogFunction.Arn'
+  #     FunctionName: !Ref AddThermostatFunction
+  #     MaximumEventAgeInSeconds: 300
+  #     MaximumRetryAttempts: 1
+  #     Qualifier: !GetAtt Version.Version
   
   # This role allows API Gateway to push execution and access logs to CloudWatch logs
   ApiGatewayPushToCloudWatchRole:
