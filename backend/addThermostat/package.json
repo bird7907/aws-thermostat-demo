@@ -1,7 +1,7 @@
 {
   "name": "CreateThermostat-item",
   "version": "1.0.0",
-  "description": "Creates a ToDo item on the DynamoDB Table",
+  "description": "Creates a Thermostat item on the DynamoDB Table",
   "main": "src/app.js",
   "author": "SAM CLI",
   "license": "MIT",

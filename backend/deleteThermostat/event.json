@@ -1,7 +1,7 @@
 {
-   "resource": "/thermostats/{id}",
-   "path": "/thermostats/1",
-   "httpMethod": "GET",
+   "resource": "item/{id}",
+   "path": "item/bad9af20-0429-11ea-a27a-a18cf3b2c720",
+   "httpMethod": "POST",
    "headers": {
        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
        "accept-encoding": "gzip, deflate, br",
@@ -21,7 +21,7 @@
        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.70 Safari/537.36",
        "Via": "2.0 af59cbeda88e3a41b2689a634f61c64d.cloudfront.net (CloudFront)",
        "X-Amz-Cf-Id": "NzOz5TfgbqItgmy_C2Zj4TjAnkMteY-aNMmshY4W9TZ1U-rJr5LHWw==",
-       "X-Amzn-Trace-Id": "Root=1-5dc86974-035ac025a456001d3ac4b6cb;Sampled=1",
+       "X-Amzn-Trace-Id": "Root=1-5dc86974-035ac025a456001d3ac4b6cb",
        "X-Forwarded-For": "72.21.196.66, 54.239.145.80",
        "X-Forwarded-Port": "443",
        "X-Forwarded-Proto": "https"
@@ -82,7 +82,7 @@
            "NzOz5TfgbqItgmy_C2Zj4TjAnkMteY-aNMmshY4W9TZ1U-rJr5LHWw=="
        ],
        "X-Amzn-Trace-Id": [
-           "Root=1-5dc86974-035ac025a456001d3ac4b6cb;Sampled=1"
+           "Root=1-5dc86974-035ac025a456001d3ac4b6cb"
        ],
        "X-Forwarded-For": [
            "72.21.196.66, 54.239.145.80"
@@ -97,32 +97,16 @@
    "queryStringParameters": null,
    "multiValueQueryStringParameters": null,
    "pathParameters": {
-       "id": "1"
+       "id": "b2ff3a30-042a-11ea-be16-59b2de0241df"
    },
    "stageVariables": null,
    "requestContext": {
-       "authorizer": {
-         "claims": {
-             "at_hash": "jFB4pZ3DsY_RCKEXAMPLE",
-             "sub": "a68a998a-d8de-48dd-9ff4-2656ef385cec",
-             "aud": "mj9hu7v4nrmtsu12cispl3rt2",
-             "email_verified": "true",
-             "event_id": "ddba78de-02b9-4a30-b9ba-4d0ab6b08c00",
-             "token_use": "id",
-             "auth_time": "1602355121",
-             "iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_i0DHLhpXX",
-             "cognito:username": "a68a998a-d8de-48dd-9ff4-2656ef385cec",
-             "exp": "Sat Oct 10 19:38:41 UTC 2020",
-             "iat": "Sat Oct 10 18:38:41 UTC 2020",
-             "email": "johndoe@example.com"
-         }
-       },
        "resourceId": "d14k8r",
-       "resourcePath": "/thermostats/{id}",
+       "resourcePath": "/item/{id}",
        "httpMethod": "GET",
        "extendedRequestId": "C9VqNFmZIAMFZ6w=",
        "requestTime": "10/Nov/2019:19:48:04 +0000",
-       "path": "/prod/thermostats/1",
+       "path": "/prod/item/1",
        "accountId": "407958460921",
        "protocol": "HTTP/1.1",
        "stage": "prod",

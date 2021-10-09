@@ -1,7 +1,7 @@
 {
-  "name": "GetThermostat-item",
+  "name": "UpdateThermostat-item",
   "version": "1.0.0",
-  "description": "Add a new Thermostat item to the DynamoDB Table",
+  "description": "Updates a Thermostat item on the DynamoDB Table",
   "main": "src/app.js",
   "author": "SAM CLI",
   "license": "MIT",

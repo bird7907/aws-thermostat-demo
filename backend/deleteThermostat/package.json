@@ -1,7 +1,7 @@
 {
-  "name": "GetThermostat-item",
+  "name": "DeleteThermostat-item",
   "version": "1.0.0",
-  "description": "Add a new Thermostat item to the DynamoDB Table",
+  "description": "Delete a Thermostat item from the DynamoDB Table",
   "main": "src/app.js",
   "author": "SAM CLI",
   "license": "MIT",
