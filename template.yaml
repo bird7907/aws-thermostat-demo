@@ -34,12 +34,6 @@ Parameters:
   CognitoDomainName:
     Type: String
     Default: thermostatdemo
-  ThermostatTableName:
-    Type: String
-    Default: thermostat-table
-  LogTableName:
-    Type: String
-    Default: log-table
 
   # For Amplify Console frontend hosting
   Repository:
@@ -168,11 +162,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref ThermostatTableName
+            TableName: !Ref ThermostatTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTableName
+          TABLE_NAME: !Ref ThermostatTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           USE_DYNAMODB_LOCAL: "0"
           DYNAMODB_LOCAL_URI: ""
@@ -195,11 +189,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref ThermostatTableName
+            TableName: !Ref ThermostatTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTableName
+          TABLE_NAME: !Ref ThermostatTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -221,11 +215,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref ThermostatTableName
+            TableName: !Ref ThermostatTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref ThermostatTableName
+          TABLE_NAME: !Ref ThermostatTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -239,36 +233,6 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
-    DestinationConfig:
-      OnSuccess:
-        Destination: !GetAtt 'AddLogFunction.Arn'
-
-  GetAllLogsFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: backend/getAllLogs
-      Handler: app.getAllLogs
-      Tracing: Active
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref LogTableName
-        - CloudWatchPutMetricPolicy: {}
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref LogTableName
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
-
-      Events:
-        GetItem:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /logs
-            Method: GET
-            RestApiId: !Ref ThermostatApi
-            Auth:
-              Authorizer: CognitoAuthorizer
-
 # UpdateThermostatFunction:
 #     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 #     Properties:
@@ -277,11 +241,11 @@ Resources:
 #       Tracing: Active
 #       Policies:
 #         - DynamoDBCrudPolicy:
-#             TableName: !Ref ThermostatTableName
+#             TableName: !Ref ThermostatTable
 #         - CloudWatchPutMetricPolicy: {}
 #       Environment:
 #         Variables:
-#           TABLE_NAME: !Ref ThermostatTableName
+#           TABLE_NAME: !Ref ThermostatTable
 #           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
 #       Events:
 #         UpdateItem:
@@ -300,11 +264,11 @@ Resources:
 #     Tracing: Active
 #     Policies:
 #       - DynamoDBCrudPolicy:
-#           TableName: !Ref ThermostatTableName
+#           TableName: !Ref ThermostatTable
 #       - CloudWatchPutMetricPolicy: {}
 #     Environment:
 #       Variables:
-#         TABLE_NAME: !Ref ThermostatTableName
+#         TABLE_NAME: !Ref ThermostatTable
 #         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
 #         ENDPOINT_OVERRIDE: ""
 #     Events:
@@ -316,6 +280,33 @@ Resources:
 #           RestApiId: !Ref ThermostatApi
 #           Auth:
 #             Authorizer: CognitoAuthorizer
+
+  GetAllLogsFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: backend/getAllLogs
+      Handler: app.getAllLogs
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LogTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LogTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+
+      Events:
+        GetItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /logs
+            Method: GET
+            RestApiId: !Ref ThermostatApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+
   AddLogFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -324,11 +315,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref LogTableName
+            TableName: !Ref LogTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref LogTableName
+          TABLE_NAME: !Ref LogTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -341,6 +332,25 @@ Resources:
             RestApiId: !Ref ThermostatApi
             Auth:
               Authorizer: CognitoAuthorizer
+
+  Version:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref AddThermostatFunction
+
+  # Log after adding item
+  InvokeLoggingconfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      DestinationConfig:
+          OnFailure:
+            Destination: !GetAtt 'AddLogFunction.Arn'
+          OnSuccess:
+            Destination: !GetAtt 'AddLogFunction.Arn'
+      FunctionName: !Ref AddThermostatFunction
+      MaximumEventAgeInSeconds: 300
+      MaximumRetryAttempts: 1
+      Qualifier: !GetAtt Version.Version
   
   # This role allows API Gateway to push execution and access logs to CloudWatch logs
   ApiGatewayPushToCloudWatchRole:
@@ -401,11 +411,11 @@ Resources:
           phases:
             build:
               commands:
-                - cd www/src
+                - cd frontend
                 - npm install
                 - npm run build
           artifacts:
-            baseDirectory: www/build/
+            baseDirectory: frontend/dist/
             files:
               - '**/*'
       Tags:
