@@ -84,7 +84,7 @@ export async function getInitialState() {
 export const layout = ({ initialState }) => {
 
   return {
-    rightContentRender:
+    rightContentRender:()=>
       <Button
         href={`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`}
         color="primary"
