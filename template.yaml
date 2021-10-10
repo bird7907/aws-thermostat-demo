@@ -233,53 +233,54 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
-# UpdateThermostatFunction:
-#     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-#     Properties:
-#       CodeUri: backend/updateThermostat/
-#       Handler: app.updateThermostatItem
-#       Tracing: Active
-#       Policies:
-#         - DynamoDBCrudPolicy:
-#             TableName: !Ref ThermostatTable
-#         - CloudWatchPutMetricPolicy: {}
-#       Environment:
-#         Variables:
-#           TABLE_NAME: !Ref ThermostatTable
-#           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-#       Events:
-#         UpdateItem:
-#           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-#           Properties:
-#             Path: /thermostats/{id}
-#             Method: PUT
-#             RestApiId: !Ref ThermostatApi
-#             Auth:
-#               Authorizer: CognitoAuthorizer
-# DeleteThermostatFunction:
-#   Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-#   Properties:
-#     CodeUri: backend/deleteThermostat
-#     Handler: app.deleteThermostatItem
-#     Tracing: Active
-#     Policies:
-#       - DynamoDBCrudPolicy:
-#           TableName: !Ref ThermostatTable
-#       - CloudWatchPutMetricPolicy: {}
-#     Environment:
-#       Variables:
-#         TABLE_NAME: !Ref ThermostatTable
-#         AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-#         ENDPOINT_OVERRIDE: ""
-#     Events:
-#       DeleteItem:
-#         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-#         Properties:
-#           Path: /thermostats/{id}
-#           Method: DELETE
-#           RestApiId: !Ref ThermostatApi
-#           Auth:
-#             Authorizer: CognitoAuthorizer
+  UpdateThermostatFunction:
+      Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+      Properties:
+        CodeUri: backend/updateThermostat/
+        Handler: app.updateThermostatItem
+        Tracing: Active
+        Policies:
+          - DynamoDBCrudPolicy:
+              TableName: !Ref ThermostatTable
+          - CloudWatchPutMetricPolicy: {}
+        Environment:
+          Variables:
+            TABLE_NAME: !Ref ThermostatTable
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+        Events:
+          UpdateItem:
+            Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+            Properties:
+              Path: /thermostats/{id}
+              Method: PUT
+              RestApiId: !Ref ThermostatApi
+              Auth:
+                Authorizer: CognitoAuthorizer
+  
+  DeleteThermostatFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: backend/deleteThermostat
+      Handler: app.deleteThermostatItem
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ThermostatTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ThermostatTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+      Events:
+        DeleteItem:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /thermostats/{id}
+            Method: DELETE
+            RestApiId: !Ref ThermostatApi
+            Auth:
+              Authorizer: CognitoAuthorizer
 
   GetAllLogsFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
