@@ -29,16 +29,16 @@ const UpdateForm = (props) => {
         name="basic"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
-        initialValues={{ thermo: props.values.thermo }}
+        initialValues={{id: props.values.id, thermo: props.values.thermo }}
         autoComplete="off"
       >
          <Form.Item
           label="id"
           name="id"
         >
-          <Input />
+          <Input disabled />
         </Form.Item>
-        {props.values.id}
+      
         <Form.Item
           label="thermo"
           name="thermo"

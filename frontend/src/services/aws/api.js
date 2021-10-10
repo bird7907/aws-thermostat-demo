@@ -15,7 +15,7 @@ import { history } from 'umi';
 //   });
 // }
 
-export async function getAllThermostats(params, options) {
+const doRequest = async (url, method, data, options) => {
   let headers = {};
   if (localStorage.getItem('awsToken')) {
     headers = {
@@ -25,64 +25,37 @@ export async function getAllThermostats(params, options) {
 
   options = { ...options, headers };
 
-  return axios.get(`${awsconfig.api_base_url}/thermostats/`,
-    {
-      params: { ...params },
-      ...(options || {}),
+  return axios.request({
+    url: url,
+    method: method,
+    data: { ...data },
+    ...(options || {}),
+
+  }).catch(function (error) {
+    console.error("doRequest" + JSON.stringify(error));
+
+    //Handle CORS error
+    if ((error.message && error.message === 'Network Error') || (error.status >= 400 && error.status < 500)) {
+      window.open(`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`);
     }
-  ).catch(function (error) {
-    if (error.response) { 
-      if(status >= 400 && status < 500){
-        history.push(`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`);
-      }
-    }
+
   });
+}
+
+export async function getAllThermostats(params, options) {
+  return doRequest(`${awsconfig.api_base_url}/thermostats/`, 'GET');
 }
 
 export async function addThermostat(data, params, options) {
-  let headers = {};
-  if (localStorage.getItem('awsToken')) {
-    headers = {
-      'Authorization': `Bearer ${localStorage.getItem('awsToken')}`,
-    };
-  }
-
-  options = { ...options, headers };
-
-  return axios.put(`${awsconfig.api_base_url}/thermostats/`, { ...data },
-    {
-      params: { ...params },
-      ...(options || {}),
-    }
-  ).catch(function (error) {
-    if (error.response) { 
-      if(status >= 400 && status < 500){
-        history.push(`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`);
-      }
-    }
-  });
+  return doRequest(`${awsconfig.api_base_url}/thermostats/`, 'PUT', { ...data });
 }
 
 export async function updateThermostat(id, data, options) {
-  let headers = {};
-  if (localStorage.getItem('awsToken')) {
-    headers = {
-      'Authorization': `Bearer ${localStorage.getItem('awsToken')}`,
-    };
-  }
 
-  options = { ...options, headers };
+  return doRequest(`${awsconfig.api_base_url}/thermostats/${id}`, 'PUT', { ...data });
+}
 
-  return axios.put(`${awsconfig.api_base_url}/thermostats/${id}/`, { ...data },
-    {
-      ...(options || {}),
-    }
-  ).catch(function (error) {
-    if (error.response) { 
-      if(status >= 400 && status < 500){
-        history.push(`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`);
-      }
-    }
-  });
+export async function deleteThermostat(id) {
+  return doRequest(`${awsconfig.api_base_url}/thermostats/${id}`, 'DELETE');
 }
 

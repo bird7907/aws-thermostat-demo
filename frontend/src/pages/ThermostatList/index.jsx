@@ -8,7 +8,7 @@ import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import UpdateForm from './components/UpdateForm';
 import { rule, addRule, updateRule, removeRule } from '@/services/ant-design-pro/api';
-import { getAllThermostats, addThermostat, updateThermostat } from '@/services/aws/api';
+import { getAllThermostats, addThermostat, updateThermostat, deleteThermostat } from '@/services/aws/api';
 import axios from 'axios';
 import awsconfig from '../../awsConfig';
 
@@ -42,11 +42,10 @@ const handleAdd = async (fields) => {
 
 const handleUpdate = async (fields) => {
   const hide = message.loading('Configuring');
-  console.log('fields', fields);
 
   try {
     await updateThermostat(fields.id, {
-      thermo: fields.thermo,
+      "thermo": fields.thermo,
     });
     hide();
     message.success('Configuration is successful');
@@ -68,10 +67,12 @@ const handleRemove = async (selectedRows) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
 
+  
   try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
+    for (let row of selectedRows) {
+      await deleteThermostat(row.id);
+    }
+
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -161,7 +162,7 @@ const TableList = () => {
       <ProTable
         headerTitle='Thermostat List'
         actionRef={actionRef}
-        rowKey="key"
+        rowKey="id"
         search={false}
         toolBarRender={() => [
           <Button
@@ -187,9 +188,9 @@ const TableList = () => {
 
           const data = msg.data;
 
-          if (data) {
-            data.Items.forEach(i => i.key = i.id);
-          }
+          // if (data) {
+          //   data.Items.forEach(i => i.key = i.id);
+          // }
 
           return {
             data: data.Items,
@@ -240,12 +241,6 @@ const TableList = () => {
             <FormattedMessage
               id="pages.searchTable.batchDeletion"
               defaultMessage="Batch deletion"
-            />
-          </Button>
-          <Button type="primary">
-            <FormattedMessage
-              id="pages.searchTable.batchApproval"
-              defaultMessage="Batch approval"
             />
           </Button>
         </FooterToolbar>
