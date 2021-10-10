@@ -8,7 +8,7 @@ const UpdateForm = (props) => {
   return (
     <Modal
       visible={props.updateModalVisible}
-      title="Update"
+      title="Update Thermostat"
       okText="Update"
       cancelText="Cancel"
       onCancel={props.onCancel}
@@ -38,9 +38,9 @@ const UpdateForm = (props) => {
         >
           <Input />
         </Form.Item>
-        props.values.id
+        {props.values.id}
         <Form.Item
-          label="Thermo"
+          label="thermo"
           name="thermo"
         >
           <Input />

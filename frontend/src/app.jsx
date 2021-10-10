@@ -48,11 +48,11 @@ export async function getInitialState() {
     const hash = window.location.hash.substr(1);
     const objects = hash.split("&");
     let token = "";
-   
+
     objects.forEach(object => {
       const keyVal = object.split("=");
       if (keyVal[0] === "id_token") {
-        token = keyVal[1] ;
+        token = keyVal[1];
         localStorage.setItem('awsToken', keyVal[1]);
       }
     });
@@ -65,7 +65,7 @@ export async function getInitialState() {
     const currentUser = "Test";
 
     const awsToken = await fetchAwsToken();
-    console.log("awsToken="+awsToken);
+    console.log("awsToken=" + awsToken);
 
     return {
       fetchUserInfo,
@@ -81,11 +81,10 @@ export async function getInitialState() {
   };
 } // ProLayout 支持的api https://procomponents.ant.design/components/layout
 
-export const layout = ({ initialState, idToken }) => {
-  const isLogin = localStorage.getItem('awsToken') == 'undefined' || !localStorage.getItem('awsToken');
+export const layout = ({ initialState }) => {
 
   return {
-    rightContentRender: () => isLogin &&
+    rightContentRender:
       <Button
         href={`https://${awsconfig.cognito_hosted_domain}/login?response_type=token&client_id=${awsconfig.aws_user_pools_web_client_id}&redirect_uri=${awsconfig.redirect_url}`}
         color="primary"

@@ -46,7 +46,7 @@ const handleUpdate = async (fields) => {
 
   try {
     await updateThermostat(fields.id, {
-      thermo: fieldsthermo,
+      thermo: fields.thermo,
     });
     hide();
     message.success('Configuration is successful');
@@ -251,7 +251,7 @@ const TableList = () => {
         </FooterToolbar>
       )}
       <ModalForm
-        title="New"
+        title="New Thermostat"
         width="400px"
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
@@ -305,15 +305,15 @@ const TableList = () => {
         }}
         closable={false}
       >
-        {currentRow?.name && (
+        {currentRow?.cognito_username && (
           <ProDescriptions
             column={2}
-            title={currentRow?.name}
+            title={currentRow?.cognito_username}
             request={async () => ({
               data: currentRow || {},
             })}
             params={{
-              id: currentRow?.name,
+              id: currentRow?.cognito_username,
             }}
             columns={columns}
           />
