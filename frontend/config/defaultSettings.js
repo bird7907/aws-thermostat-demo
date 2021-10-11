@@ -9,7 +9,7 @@ const Settings = {
   colorWeak: false,
   title: 'AWS Demo',
   pwa: false,
-  logo: 'aws.png',
+  logo: 'logo.svg',
   iconfontUrl: '',
 };
 export default Settings;
