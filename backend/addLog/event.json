@@ -1,7 +1,7 @@
 {
-   "body": "{\"thermo\":\"36\"}",
-    "resource": "thermostat",
-    "path": "/thermostats",
+   "body": "{\"test_log\":\"36\"}",
+    "resource": "log",
+    "path": "/logs",
     "httpMethod": "PUT",
     "isBase64Encoded": false,
     "queryStringParameters": {
@@ -13,7 +13,7 @@
       ]
     },
     "pathParameters": {
-      "proxy": "/thermostats"
+      "proxy": "/logs"
     },
     "stageVariables": {
       "baz": "qux"
@@ -131,8 +131,8 @@
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36",
         "user": null
       },
-      "path": "/prod/thermostats",
-      "resourcePath": "thermostat",
+      "path": "/prod/logs",
+      "resourcePath": "log",
       "httpMethod": "PUT",
       "apiId": "1234567890",
       "protocol": "HTTP/1.1"

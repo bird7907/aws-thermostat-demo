@@ -11,7 +11,7 @@ const { v1: uuidv1 } = require("uuid");
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
-console.log('REGION='+REGION);
+console.log('REGION=' + REGION);
 AWS.config.update({ region: REGION });
 
 if (ENDPOINT_OVERRIDE !== "") {
@@ -62,8 +62,8 @@ function addRecord(event) {
     ...JSON.parse(event.body),
   };
 
-  console.log("TABLE_NAME: "+TABLE_NAME+"\r\n");
-  console.log("Test body: "+JSON.stringify(item_body)+"\r\n");
+  console.log("TABLE_NAME: " + TABLE_NAME + "\r\n");
+  console.log("Test body: " + JSON.stringify(item_body) + "\r\n");
 
   //final params to DynamoDB
   const params = {
@@ -94,11 +94,11 @@ exports.addLogItem = metricScope((metrics) => async (event, context) => {
     metrics.putMetric("Success", 1, Unit.Count);
     // let data = {"msg": "success"};
 
-    console.log("data="+JSON.stringify(data));
+    console.log("data=" + JSON.stringify(data));
     return response(200, data);
   } catch (err) {
     metrics.putMetric("Error", 1, Unit.Count);
-    console.warn("err: "+JSON.stringify(err));
+    console.warn("err: " + JSON.stringify(err));
     return response(400, { message: err.message });
   }
 });

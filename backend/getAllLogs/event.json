@@ -1,7 +1,7 @@
 {
   "body": "eyJ0ZXN0IjoiYm9keSJ9",
-  "resource": "/thermostats/",
-  "path": "/thermostats/",
+  "resource": "/logs/",
+  "path": "/logs/",
   "httpMethod": "GET",
   "isBase64Encoded": true,
   "queryStringParameters": {
@@ -13,7 +13,7 @@
     ]
   },
   "pathParameters": {
-    "proxy": "/thermostats"
+    
   },
   "stageVariables": {
     "baz": "qux"
@@ -134,8 +134,8 @@
       "userAgent": "Custom User Agent String",
       "user": null
     },
-    "path": "/thermostats",
-    "resourcePath": "/thermostats",
+    "path": "/logs",
+    "resourcePath": "/logs",
     "httpMethod": "GET",
     "apiId": "1234567890",
     "protocol": "HTTP/1.1"

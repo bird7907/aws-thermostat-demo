@@ -52,8 +52,10 @@ function getCognitoUsername(event) {
 
 function updateRecord(username, recordId, eventBody) {
   console.log('updateRecord, username=' + username + ', recordId=' + recordId);
-  console.log(eventBody);
+  console.log('eventBody'+eventBody);
 
+  const json = JSON.parse(eventBody);
+  const thermo = json.thermo;
   let d = new Date();
   const params = {
     TableName: TABLE_NAME,
@@ -63,7 +65,7 @@ function updateRecord(username, recordId, eventBody) {
     },
     UpdateExpression: "set thermo = :t, lastupdate_date = :lud",
     ExpressionAttributeValues: {
-      ":t": eventBody.thermo,
+      ":t": thermo,
       ":lud": d.toISOString(),
     },
     ReturnValues: "ALL_NEW",
