@@ -9,7 +9,7 @@ const Settings = {
   colorWeak: false,
   title: 'AWS Demo',
   pwa: false,
-  logo: 'logo.svg',
+  logo: 'https://a0.awsstatic.com/libra-css/images/logos/aws_smile-header-desktop-en-white_59x35.png',
   iconfontUrl: '',
 };
 export default Settings;
