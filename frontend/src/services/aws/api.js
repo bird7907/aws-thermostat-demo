@@ -6,15 +6,6 @@ import awsconfig from '../../awsConfig';
 import axios from 'axios';
 import { history } from 'umi';
 
-
-// export async function getAllThermostats(options) {
-//   return request(`https://${awsconfig.cognito_hosted_domain}/thermostats`, {
-//     // return request(`/thermostats`, {
-//     method: 'GET',
-//     ...(options || {}),
-//   });
-// }
-
 const doRequest = async (url, method, data, options) => {
   let headers = {};
   if (localStorage.getItem('awsToken')) {
@@ -42,6 +33,7 @@ const doRequest = async (url, method, data, options) => {
   });
 }
 
+//Thermostat
 export async function getAllThermostats(params, options) {
   return doRequest(`${awsconfig.api_base_url}/thermostats/`, 'GET');
 }
@@ -59,3 +51,11 @@ export async function deleteThermostat(id) {
   return doRequest(`${awsconfig.api_base_url}/thermostats/${id}`, 'DELETE');
 }
 
+//Log
+export async function getAllLogs(params, options) {
+  return doRequest(`${awsconfig.api_base_url}/logs/`, 'GET');
+}
+
+export async function addLog(data, params, options) {
+  return doRequest(`${awsconfig.api_base_url}/logs/`, 'PUT', { ...data });
+}

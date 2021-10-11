@@ -8,7 +8,7 @@ import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import UpdateForm from './components/UpdateForm';
 import { rule, addRule, updateRule, removeRule } from '@/services/ant-design-pro/api';
-import { getAllThermostats, addThermostat, updateThermostat, deleteThermostat } from '@/services/aws/api';
+import { getAllThermostats, addThermostat, updateThermostat, deleteThermostat, addLog } from '@/services/aws/api';
 import axios from 'axios';
 import awsconfig from '../../awsConfig';
 
@@ -24,6 +24,7 @@ const handleAdd = async (fields) => {
 
   try {
     await addThermostat({ ...fields });
+    addLog({ action: "Add", body: { ...fields } });
     hide();
     message.success('Added successfully');
     return true;
@@ -47,6 +48,8 @@ const handleUpdate = async (fields) => {
     await updateThermostat(fields.id, {
       "thermo": fields.thermo,
     });
+    addLog({ action: "Update", body: { ...fields } });
+
     hide();
     message.success('Configuration is successful');
     return true;
@@ -67,10 +70,11 @@ const handleRemove = async (selectedRows) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
 
-  
+
   try {
     for (let row of selectedRows) {
       await deleteThermostat(row.id);
+      addLog({ action: "Delete", body: { ...row } });
     }
 
     hide();
